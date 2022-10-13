@@ -1,9 +1,6 @@
 import './style.scss';
 import { html, render } from 'lit-html';
-import makeStore from './data';
-import intializers from './initializers.js';
-import btn from './comp';
-import comp3 from './comp3';
+import makeStore from './makeStore';
 
 const root = (data) => html`<h1>${data.text}</h1>
 	${btn(data.text)} ${comp3(data.text)} `;
