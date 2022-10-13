@@ -6,11 +6,11 @@ import btn from './comp';
 import comp3 from './comp3';
 
 const root = (data) => html`<h1>${data.text}</h1>
-	${btn(data.text)} ${comp3(data.text)}`;
+	${btn(data.text)} ${comp3(data.text)} `;
 
 const data = {
-	text: 'GAAAY22',
-	booty: 'imgay',
+	text: 'HELLO',
+	booty: 'NONONO',
 	list: [],
 	width: 10,
 };
