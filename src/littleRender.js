@@ -34,15 +34,13 @@ export const makeComponent = (component) => {
 			this.part = partInfo;
 			this.component = component;
 
-			this.subsequent = (data) => {
-				console.log('CALLING SUBSEQUENT');
-				return this.component(data);
+			this.subsequent = (data, initValues) => {
+				return this.component(data, initValues);
 			};
 
 			this.current = (data) => {
-				console.log('CALLING INITIAL');
-
 				const initValues = this.component.initializer();
+				this.initValues = initValues;
 				const rendered = this.component(data, initValues);
 
 				this.current = this.subsequent;
@@ -57,7 +55,7 @@ export const makeComponent = (component) => {
 			this.renders++;
 			if (!this.component) this.component = component;
 
-			return this.current(data);
+			return this.current(data, this.initValues);
 		}
 	}
 

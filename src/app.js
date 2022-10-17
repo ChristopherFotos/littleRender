@@ -1,26 +1,19 @@
 import './style.scss';
 import { render, html, noChange } from 'lit';
 import { makeStore } from './littleRender';
-
 import root from './root';
 
-let click = 0;
-
-const reRender = () => {
-	click++;
-	render(parent(), document.body);
-};
-
 const parent = () => {
-	const ifClick = () => {
-		if (click > 3) return root(27);
-	};
+	function click() {
+		store.timers = [...store.timers, 0];
+	}
 
-	return html`<div>
-		${root(24)} ${ifClick()}
-
-		<button @click=${reRender}>click</button>
-	</div>`;
+	return html`
+		<button @click=${click}>Add a timer</button>
+		<div>${store.timers.map((t) => root())}</div>
+	`;
 };
 
-console.log(render(parent(), document.body));
+export const store = makeStore(parent, document.body, { timers: [1] });
+
+render(parent(), document.body);
