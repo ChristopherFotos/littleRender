@@ -1,15 +1,28 @@
 import './style.scss';
-import { html, render } from 'lit-html';
-import { makeStore, initializers } from './littleRender';
+import { render, html, noChange } from 'lit';
+import { makeStore, initializers, renderDirective } from './littleRender';
+import { Directive, directive } from 'lit-html/directive.js';
+import { wrapComponent } from './makeComponentDirective';
+import { v4 as uuid } from 'uuid';
+import root from './root';
 
-const root = (data) => html`<h1>${data.text}</h1>`;
+let click = 0;
 
-const data = {
-	text: 'HELLO',
+const reRender = () => {
+	click++;
+	render(parent(), document.body);
 };
 
-export const store = makeStore(root, document.body, data);
-render(root(store), document.body);
-initializers.initialize();
+const parent = () => {
+	const ifClick = () => {
+		if (click > 3) return root(27);
+	};
 
-// we should have pre- and post-render hooks
+	return html`<div>
+		${root(24)} ${ifClick()}
+
+		<button @click=${reRender}>click</button>
+	</div>`;
+};
+
+console.log(render(parent(), document.body));
