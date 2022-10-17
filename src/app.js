@@ -1,9 +1,7 @@
 import './style.scss';
 import { render, html, noChange } from 'lit';
-import { makeStore, initializers, renderDirective } from './littleRender';
-import { Directive, directive } from 'lit-html/directive.js';
-import { wrapComponent } from './makeComponentDirective';
-import { v4 as uuid } from 'uuid';
+import { makeStore } from './littleRender';
+
 import root from './root';
 
 let click = 0;

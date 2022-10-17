@@ -1,10 +1,10 @@
 import { render, html } from 'lit';
-import makeComponentDirective from './makeComponentDirective';
+import { makeComponent } from './littleRender';
 
-export const rootComp = (data, init) => {
+const rootComp = (data, init) => {
 	return html`<h1>${init || data}</h1>`;
 };
 
 rootComp.initializer = () => 'intialized value';
 
-export default makeComponentDirective(rootComp);
+export default makeComponent(rootComp);
