@@ -1,5 +1,5 @@
 import './style.scss';
-import { render, html, noChange } from 'lit';
+import { render, html } from 'lit';
 import { makeStore } from './littleRender';
 import root from './root';
 

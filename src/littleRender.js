@@ -1,5 +1,6 @@
 import { render } from 'lit-html';
 import { Directive, directive } from 'lit-html/directive.js';
+import { guard } from 'lit/directives/guard.js';
 
 /* add a hooks array to each value, and then use a getter 
 trap to return the value when the property is accessed. 
@@ -34,14 +35,14 @@ export const makeComponent = (component) => {
 			this.part = partInfo;
 			this.component = component;
 
-			this.subsequent = (data, initValues) => {
-				return this.component(data, initValues);
+			this.subsequent = (data, initValues, instance) => {
+				return this.component(data, initValues, instance);
 			};
 
-			this.current = (data) => {
+			this.current = (data, _initValues, instance) => {
 				let initValues;
-				if (this.component.initializer) {
-					initValues = this.component.initializer();
+				if (this.component.initializer(instance)) {
+					initValues = this.component.initializer(instance);
 				}
 
 				this.initValues = initValues;
@@ -60,7 +61,7 @@ export const makeComponent = (component) => {
 			this.renders++;
 			if (!this.component) this.component = component;
 
-			return this.current(data, this.initValues);
+			return this.current(data, this.initValues, this);
 		}
 	}
 
