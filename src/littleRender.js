@@ -39,8 +39,13 @@ export const makeComponent = (component) => {
 			};
 
 			this.current = (data) => {
-				const initValues = this.component.initializer();
+				let initValues;
+				if (this.component.initializer) {
+					initValues = this.component.initializer();
+				}
+
 				this.initValues = initValues;
+
 				const rendered = this.component(data, initValues);
 
 				this.current = this.subsequent;
