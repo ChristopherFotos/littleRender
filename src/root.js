@@ -3,19 +3,24 @@ import { makeComponent } from './littleRender';
 import { store } from './app.js';
 import { v4 as uuid } from 'uuid';
 
-const timer = (data, init, _self) => {
-	if (store[init.id] > init.maxWidth) clearInterval(init.stopId);
+const timer = (data, { initialValues, _self }) => {
+	if (store[initialValues.id] > initialValues.maxWidth)
+		clearInterval(initialValues.stopId);
 
-	return html`<span class="timer" style="width: ${store[init.id]}px"></span>`;
+	return html`<span
+		class="timer"
+		style="width: ${store[initialValues.id]}px"
+	></span>`;
 };
 
-timer.initializer = (instance) => {
+timer.initializer = (_data, instance) => {
 	const id = uuid();
 
 	console.log('INITIALIZER THIS: ', instance);
 	const stopId = setInterval(() => {
-		store[id] ? (store[id] = store[id] + 1) : (store[id] = 1);
-	}, Math.random() * 10);
+		console.log('tick');
+		store[id] ? (store[id] = store[id] + 10) : (store[id] = 10);
+	}, 40);
 
 	return {
 		stopId,

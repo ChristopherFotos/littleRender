@@ -35,19 +35,25 @@ export const makeComponent = (component) => {
 			this.part = partInfo;
 			this.component = component;
 
-			this.subsequent = (data, initValues, instance) => {
-				return this.component(data, initValues, instance);
+			this.subsequent = (data, { initialValues, _self }) => {
+				return this.component(data, {
+					initialValues: initialValues,
+					_self: _self,
+				});
 			};
 
-			this.current = (data, _initValues, instance) => {
+			this.current = (data, { _self, initialValues }) => {
 				let initValues;
-				if (this.component.initializer(instance)) {
-					initValues = this.component.initializer(instance);
+				if (this.component.initializer) {
+					initValues = this.component.initializer(data, _self);
 				}
 
 				this.initValues = initValues;
 
-				const rendered = this.component(data, initValues);
+				const rendered = this.component(data, {
+					initialValues: initValues,
+					_self: _self,
+				});
 
 				this.current = this.subsequent;
 
@@ -57,11 +63,16 @@ export const makeComponent = (component) => {
 			this.renders = 0;
 		}
 
+		addDependency() {}
+
 		render(data) {
 			this.renders++;
 			if (!this.component) this.component = component;
 
-			return this.current(data, this.initValues, this);
+			return this.current(data, {
+				initialValues: this.initValues,
+				_self: this,
+			});
 		}
 	}
 
