@@ -1,6 +1,8 @@
 import { render } from 'lit-html';
 import { Directive, directive } from 'lit-html/directive.js';
 import { guard } from 'lit/directives/guard.js';
+import { v4 as uuid } from 'uuid';
+import { noChange } from 'lit';
 
 /* add a hooks array to each value, and then use a getter 
 trap to return the value when the property is accessed. 
@@ -34,6 +36,7 @@ export const makeComponent = (component) => {
 			super(partInfo);
 			this.part = partInfo;
 			this.component = component;
+			this.dependencies = [];
 
 			this.subsequent = (data, { initialValues, _self }) => {
 				return this.component(data, {
@@ -63,10 +66,58 @@ export const makeComponent = (component) => {
 			this.renders = 0;
 		}
 
-		addDependency() {}
+		addDependency(store, key) {
+			console.log('Adding dependency: ', store, key, store[key]);
+			let lastKnownValue;
+
+			if (Array.isArray(store[key])) {
+				lastKnownValue = [...store[key]];
+			} else if (
+				typeof store[key] === 'object' &&
+				!Array.isArray(store[key]) &&
+				store[key] !== null
+			) {
+				lastKnownValue = { ...store[key] };
+			} else {
+				lastKnownValue = store[key];
+			}
+
+			const dependency = {
+				store,
+				key,
+				lastKnownValue,
+			};
+
+			this.dependencies.push(dependency);
+		}
+
+		shouldUpdate() {
+			const depLength = this.dependencies.length;
+
+			for (let i = 0; i < depLength; i++) {
+				let dep = this.dependencies[i];
+
+				const compare = {
+					current: dep.store[dep.key],
+					lastKnown: dep.lastKnownValue,
+				};
+
+				const isDifferent = !(compare.lastKnown === compare.current);
+
+				if (isDifferent) {
+					dep.lastKnownValue = compare.current;
+					return true;
+				}
+			}
+
+			return false;
+		}
 
 		render(data) {
 			this.renders++;
+			let willUpdate = this.shouldUpdate();
+
+			if (this.renders > 1 && !willUpdate) return noChange;
 			if (!this.component) this.component = component;
 
 			return this.current(data, {

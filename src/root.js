@@ -3,30 +3,26 @@ import { makeComponent } from './littleRender';
 import { store } from './app.js';
 import { v4 as uuid } from 'uuid';
 
-const timer = (data, { initialValues, _self }) => {
-	if (store[initialValues.id] > initialValues.maxWidth)
-		clearInterval(initialValues.stopId);
+const numRaw = (data) => {
+	console.log('rendering number');
+	return html`<h1>${store.number}</h1>`;
+};
 
-	return html`<span
-		class="timer"
-		style="width: ${store[initialValues.id]}px"
-	></span>`;
+numRaw.initializer = (_data, instance) => {
+	instance.addDependency(store, 'number');
+	console.log('NUM init', instance);
+};
+
+export const num = makeComponent(numRaw);
+
+const timer = (data) => {
+	console.log('rendering text');
+	return html`<h1>${store.text}</h1>`;
 };
 
 timer.initializer = (_data, instance) => {
-	const id = uuid();
-
-	console.log('INITIALIZER THIS: ', instance);
-	const stopId = setInterval(() => {
-		console.log('tick');
-		store[id] ? (store[id] = store[id] + 10) : (store[id] = 10);
-	}, 40);
-
-	return {
-		stopId,
-		id,
-		maxWidth: Math.random() * 1000,
-	};
+	instance.addDependency(store, 'text');
+	console.log('TEXT init', instance);
 };
 
 export default makeComponent(timer);
