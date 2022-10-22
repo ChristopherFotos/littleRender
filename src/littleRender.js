@@ -1,8 +1,8 @@
 import { render } from 'lit-html';
 import { Directive, directive } from 'lit-html/directive.js';
-import { guard } from 'lit/directives/guard.js';
-import { v4 as uuid } from 'uuid';
 import { noChange } from 'lit';
+import copyObject from 'lodash/_copyObject';
+import copyArray from 'lodash/_copyArray';
 
 /* add a hooks array to each value, and then use a getter 
 trap to return the value when the property is accessed. 
@@ -34,17 +34,18 @@ export const makeComponent = (component) => {
 	class ComponentDirective extends Directive {
 		constructor(partInfo) {
 			super(partInfo);
+
+			// Run the component function to do the initial setup, call hooks etc.
+			component();
+
 			this.part = partInfo;
 			this.component = component;
 			this.dependencies = [];
 
-			this.subsequent = (data, { initialValues, _self }) => {
-				return this.component(data, {
-					initialValues: initialValues,
-					_self: _self,
-				});
-			};
-
+			// At the start of a components lifecycle, the current property
+			// will be a function that calls the component's initializer, if
+			// it has one. After calling the initializer and returning a
+			// renderable  value, it will set this.current to this.subsequent
 			this.current = (data, { _self, initialValues }) => {
 				let initValues;
 				if (this.component.initializer) {
@@ -63,25 +64,41 @@ export const makeComponent = (component) => {
 				return rendered;
 			};
 
+			// the function that runs on all renders after the first one.
+			// just returns the component's rendered markup.
+			this.subsequent = (data, { initialValues, _self }) => {
+				return this.component(data, {
+					initialValues: initialValues,
+					_self: _self,
+				});
+			};
 			this.renders = 0;
 		}
 
+		addState() {}
+
 		addDependency(store, key) {
-			console.log('Adding dependency: ', store, key, store[key]);
+			// Holds the current value of the dependency being added. Will
+			// be compared to the current value on subsequent renders to
+			// determine whether the component should re-render or not.
 			let lastKnownValue;
 
+			// If the dependency is an object or an array, store a copy of
+			// it in lastKNownValue. If it's a primitive, just store the value.
 			if (Array.isArray(store[key])) {
-				lastKnownValue = [...store[key]];
+				lastKnownValue = copyArray(store[key]);
 			} else if (
 				typeof store[key] === 'object' &&
 				!Array.isArray(store[key]) &&
 				store[key] !== null
 			) {
-				lastKnownValue = { ...store[key] };
+				lastKnownValue = copyObject(store[key]);
 			} else {
 				lastKnownValue = store[key];
 			}
 
+			// The dependency object will contain the store and key needed
+			// to access it, as well as the dependency's last know value.
 			const dependency = {
 				store,
 				key,
@@ -92,34 +109,46 @@ export const makeComponent = (component) => {
 		}
 
 		shouldUpdate() {
+			// Caching the array length for performance.
 			const depLength = this.dependencies.length;
 
+			// Using a for loop for performance
 			for (let i = 0; i < depLength; i++) {
 				let dep = this.dependencies[i];
 
+				// store the current and last known value in an object for
+				// comparison
 				const compare = {
 					current: dep.store[dep.key],
 					lastKnown: dep.lastKnownValue,
 				};
 
+				// Is it different?
 				const isDifferent = !(compare.lastKnown === compare.current);
 
+				// If it is, update the last known value and return true to
+				// signal that the component should be re-rendered.
 				if (isDifferent) {
 					dep.lastKnownValue = compare.current;
 					return true;
 				}
 			}
 
+			// If no differences are found, return false to signal that the
+			// component does not need to re-render.
 			return false;
 		}
 
 		render(data) {
 			this.renders++;
+
+			// Check if the component needs to update
 			let willUpdate = this.shouldUpdate();
 
 			if (this.renders > 1 && !willUpdate) return noChange;
 			if (!this.component) this.component = component;
 
+			// Return renderable markup
 			return this.current(data, {
 				/*
 				This object can be used as the API for this object. Feed methods and properties
