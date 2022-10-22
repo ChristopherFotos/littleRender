@@ -121,6 +121,11 @@ export const makeComponent = (component) => {
 			if (!this.component) this.component = component;
 
 			return this.current(data, {
+				/*
+				This object can be used as the API for this object. Feed methods and properties
+			  from this class into this object, and the user can destructure whichever pieces 
+				they want. 
+				*/
 				initialValues: this.initValues,
 				_self: this,
 			});

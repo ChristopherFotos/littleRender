@@ -14,6 +14,7 @@ numRaw.initializer = (_data, instance) => {
 };
 
 export const num = makeComponent(numRaw);
+console.log('NUM RETURN VAL:', num);
 
 const timer = (data) => {
 	console.log('rendering text');
