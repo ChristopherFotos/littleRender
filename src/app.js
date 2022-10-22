@@ -1,19 +1,27 @@
 import './style.scss';
-import { render, html, noChange } from 'lit';
+import { render, html } from 'lit';
 import { makeStore } from './littleRender';
-import root from './root';
+import root, { num } from './root';
+
+const changeText = () => {
+	store.text = store.text + ' BANG!';
+};
+const changeNumber = () => {
+	store.number = store.number + 1;
+};
 
 const parent = () => {
-	function click() {
-		store.timers = [...store.timers, 0];
-	}
-
 	return html`
-		<button @click=${click}>Add a timer</button>
-		<div>${store.timers.map((t) => root())}</div>
+		<button @click=${changeText}>Change Text</button>
+		<button @click=${changeNumber}>Change Number</button>
+		<div>${root()}</div>
+		<div>${num()}</div>
 	`;
 };
 
-export const store = makeStore(parent, document.body, { timers: [1] });
+export const store = makeStore(parent, document.body, {
+	text: 'shalom',
+	number: 0,
+});
 
 render(parent(), document.body);
