@@ -2,29 +2,31 @@ import { html } from 'lit';
 import { makeComponent } from './littleRender';
 import { store } from './app.js';
 
+// idea for updating in response to props changes:
+// store a 'current data' property in the class. in
+// should Update, check if the data recieved this
+// time is different from last time. if so, re-render
+
 const numRaw = (data, { addState, addInit, addDependency, _self }) => {
-	// the newly set state isn't reflecting here
 	const [state, setState, s1id] = addState(store, 1);
 	const [state2, setState2, s2id] = addState(store, 2);
 	const [state3, setState3, s3id] = addState(store, 3);
 	const [state4, setState4, s4id] = addState(store, 4);
 
-	// which means the next time i go and setState, it's setting it to
-	// the same value as before, which means that 'noChange' is returned,
-	// and this component does not re-render
-
-	console.log('RENDER');
 	const click = () => {
-		store[s2id] = store[s2id] + 1;
+		setState2(state2 + 1);
 	};
 
 	addInit(() => {
 		addDependency(store, 'number');
+		addDependency(store, 'text');
 	});
 
 	return html`
 		<h1>${state2}</h1>
+		<h1>${store.number}</h1>
 		<button @click=${click}>Here click</button>
+		${makeComponent(timer)()}
 	`;
 };
 
@@ -33,7 +35,6 @@ const timer = (data, { addState, addInit, addDependency }) => {
 		addDependency(store, 'text');
 	});
 
-	console.log('rendering text');
 	return html`<h1>${store.text}</h1>`;
 };
 

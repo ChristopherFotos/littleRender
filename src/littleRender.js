@@ -21,12 +21,9 @@ export const makeStore = (root, rootElement, data) => {
 			}
 
 			if (prop.startsWith('NO_RENDER') && !target.hasOwnProperty(prop)) {
-				console.log('preventing re-render');
 				target[prop] = value;
 				return true;
 			}
-
-			console.log('re-rendering proxy', prop);
 
 			target[prop] = value;
 			render(target.root(target), rootElement);
@@ -80,8 +77,6 @@ export const makeComponent = (component) => {
 		}
 
 		addState = (store, state) => {
-			console.log('addstate');
-			// debugger;
 			if (this.renders === 0) {
 				const key = `NO_RENDER-${uniqueId()}`;
 
@@ -92,11 +87,7 @@ export const makeComponent = (component) => {
 					store[key],
 
 					(value) => {
-						console.log('PARAM: ', value);
-						// this.localState[this.localStatePointer][0] = value;
-						// console.log('TARGET: ', this.localState[this.localStatePointer][0]);
 						store[key] = value;
-						console.log('val ', store[key]);
 						return store[key];
 					},
 				];
@@ -113,7 +104,7 @@ export const makeComponent = (component) => {
 				const returnVal = this.localState[this.localStatePointer];
 
 				// Manually syncing the localState with the store. this is BAD,
-				// we need a single source of trueth that we can subscribe to
+				// we need a single source of truth that we can subscribe to
 				returnVal[0] = store[returnVal[2]];
 
 				this.localStatePointer += 1;
@@ -215,7 +206,6 @@ export const makeComponent = (component) => {
 
 			// Check if the component needs to update
 			let willUpdate = this.shouldUpdate();
-			console.log('SHOULD UPDATE? ', willUpdate);
 
 			if (this.renders > 1 && !willUpdate) return noChange;
 			if (!this.component) this.component = component;
